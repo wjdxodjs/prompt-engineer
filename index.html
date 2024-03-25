@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GOMOKU Game</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+    }
+    .board {
+        display: grid;
+        grid-template-columns: repeat(15, 40px);
+        grid-template-rows: repeat(15, 40px);
+    }
+    .cell {
+        width: 40px;
+        height: 40px;
+        border: 1px solid black;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    /* Alternate cell background colors */
+    .cell:nth-child(even) {
+        background-color: #eee;
+    }
+    .cell:nth-child(odd) {
+        background-color: #ccc;
+    }
+
+    /* Black stones' text color */
+    .cell.black {
+        color: black;
+    }
+</style>
+</head>
+<body>
+<h1>GOMOKU Game</h1>
+<div id="board" class="board"></div>
+<script>
+    const board = document.getElementById('board');
+    const boardSize = 15;
+    let currentPlayer = 'B';
+    let gameBoard = [];
+
+    // Create the game board
+    function createBoard() {
+        for (let i = 0; i < boardSize; i++) {
+            gameBoard[i] = [];
+            for (let j = 0; j < boardSize; j++) {
+                const cell = document.createElement('div');
+                cell.classList.add('cell');
+                cell.dataset.row = i;
+                cell.dataset.col = j;
+                cell.addEventListener('click', handleCellClick);
+                board.appendChild(cell);
+                gameBoard[i][j] = '';
+            }
+        }
+    }
+
+    // Handle cell click
+    function handleCellClick(event) {
+        const row = parseInt(event.target.dataset.row);
+        const col = parseInt(event.target.dataset.col);
+        if (!gameBoard[row][col]) {
+            gameBoard[row][col] = currentPlayer;
+            event.target.textContent = currentPlayer === 'B' ? '●' : 'O'; // Set text content based on current player
+            event.target.classList.add(currentPlayer.toLowerCase()); // Add class for black or white stones
+            if (checkWinner(row, col)) {
+                alert(`Player ${currentPlayer} wins!`);
+                resetBoard();
+            } else {
+                currentPlayer = currentPlayer === 'B' ? 'W' : 'B';
+            }
+        }
+    }
+
+    // Check for a winner
+    function checkWinner(row, col) {
+        const directions = [[1, 0], [0, 1], [1, 1], [1, -1]];
+        for (const [dr, dc] of directions) {
+            let count = 1;
+            let r = row + dr;
+            let c = col + dc;
+            while (r >= 0 && r < boardSize && c >= 0 && c < boardSize && gameBoard[r][c] === currentPlayer) {
+                count++;
+                r += dr;
+                c += dc;
+            }
+            r = row - dr;
+            c = col - dc;
+            while (r >= 0 && r < boardSize && c >= 0 && c < boardSize && gameBoard[r][c] === currentPlayer) {
+                count++;
+                r -= dr;
+                c -= dc;
+            }
+            if (count >= 5) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Reset the game board
+    function resetBoard() {
+        for (const cell of board.querySelectorAll('.cell')) {
+            cell.textContent = '';
+            cell.classList.remove('black', 'white'); // Remove stone classes
+        }
+        gameBoard = gameBoard.map(row => row.fill(''));
+        currentPlayer = 'B';
+    }
+
+    // Initialize the game
+    createBoard();
+</script>
+</body>
+</html>
